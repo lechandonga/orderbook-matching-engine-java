@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+# 本地运行事件日志与日志文件
+/data/
+/app-run*.log
