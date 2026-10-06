@@ -4,8 +4,10 @@ import com.github.lechandonga.orderbookmatchingenginejava.model.Order;
 import com.github.lechandonga.orderbookmatchingenginejava.model.OrderStatus;
 import com.github.lechandonga.orderbookmatchingenginejava.model.OrderType;
 import com.github.lechandonga.orderbookmatchingenginejava.model.Side;
+import com.github.lechandonga.orderbookmatchingenginejava.model.TimeInForce;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 public record OrderView(
         String clientOrderId,
@@ -17,10 +19,13 @@ public record OrderView(
         long qty,
         long filledQty,
         long remainingQty,
-        OrderStatus status
+        OrderStatus status,
+        TimeInForce timeInForce,
+        Instant expiresAt
 ) {
     public static OrderView of(Order o) {
         return new OrderView(o.getClientOrderId(), o.getAccountId(), o.getSymbol(), o.getSide(),
-                o.getType(), o.getPrice(), o.getQty(), o.getFilledQty(), o.remainingQty(), o.getStatus());
+                o.getType(), o.getPrice(), o.getQty(), o.getFilledQty(), o.remainingQty(), o.getStatus(),
+                o.getTimeInForce(), o.getExpiresAt());
     }
 }

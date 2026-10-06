@@ -2,8 +2,10 @@ package com.github.lechandonga.orderbookmatchingenginejava.api;
 
 import com.github.lechandonga.orderbookmatchingenginejava.model.OrderType;
 import com.github.lechandonga.orderbookmatchingenginejava.model.Side;
+import com.github.lechandonga.orderbookmatchingenginejava.model.TimeInForce;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 /**
  * 新单请求。所有字段允许缺失，由 {@code OrderValidator} 统一给出可区分的拒单原因。
@@ -16,6 +18,8 @@ public class SubmitOrderRequest {
     private OrderType type;
     private BigDecimal price;
     private Long qty;
+    private TimeInForce timeInForce;
+    private Instant expiresAt;
 
     public String getClientOrderId() { return clientOrderId; }
     public void setClientOrderId(String clientOrderId) { this.clientOrderId = clientOrderId; }
@@ -31,4 +35,8 @@ public class SubmitOrderRequest {
     public void setPrice(BigDecimal price) { this.price = price; }
     public Long getQty() { return qty; }
     public void setQty(Long qty) { this.qty = qty; }
+    public TimeInForce getTimeInForce() { return timeInForce; }
+    public void setTimeInForce(TimeInForce timeInForce) { this.timeInForce = timeInForce; }
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 }
