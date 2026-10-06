@@ -5,5 +5,6 @@ public enum EventType {
     ORDER_ADDED_TO_BOOK,
     ORDER_TRADED,
     ORDER_CANCELLED,
-    ORDER_REJECTED
+    ORDER_REJECTED,
+    ORDER_EXPIRED
 }

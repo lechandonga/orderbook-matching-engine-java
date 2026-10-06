@@ -37,7 +37,7 @@ public class EventStore {
     }
 
     @PostConstruct
-    void init() throws IOException {
+    public void init() throws IOException {
         if (file.getParent() != null) {
             Files.createDirectories(file.getParent());
         }
@@ -94,15 +94,36 @@ public class EventStore {
 
     /** 追加事件（带 CRC），并落盘，保证重启后可恢复。调用方需持有全局串行锁。 */
     public synchronized void append(EventRecord record) {
+        appendAll(List.of(record));
+    }
+
+    /** 原子追加一批事件：要么整批落盘，要么不暴露部分提交。调用方需持有业务全局串行锁。 */
+    public synchronized void appendAll(List<EventRecord> batch) {
+        if (batch.isEmpty()) {
+            return;
+        }
+        long expectedSeq = readAll().size() + 1L;
+        StringBuilder lines = new StringBuilder();
+        for (EventRecord record : batch) {
         if (record.seq() < 1) {
             throw new IllegalArgumentException("事件 seq 必须从 1 开始");
         }
+            if (record.seq() != expectedSeq) {
+                throw new EventLogException("待追加事件 seq=" + record.seq() + "，期望 " + expectedSeq);
+            }
+            expectedSeq++;
         String payloadJson = canonicalPayload(record);
         EventRecord withCrc = new EventRecord(record.version(), record.seq(), record.type(),
                 record.payload(), checksum(payloadJson));
         try {
             String line = objectMapper.writeValueAsString(withCrc) + System.lineSeparator();
-            Files.writeString(file, line, StandardCharsets.UTF_8,
+                lines.append(line);
+        } catch (IOException e) {
+            throw new UncheckedIOException("追加事件记录失败: " + file, e);
+        }
+        }
+        try {
+            Files.writeString(file, lines.toString(), StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             throw new UncheckedIOException("追加事件记录失败: " + file, e);

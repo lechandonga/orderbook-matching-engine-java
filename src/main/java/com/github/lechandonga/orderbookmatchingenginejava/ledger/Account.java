@@ -78,10 +78,12 @@ public class Account {
 
     /** 卖单成交 qty：先释放预留持仓，再交收并收款。 */
     public synchronized void settleSell(String symbol, long qty, BigDecimal price) {
-        reservedPositions.merge(symbol, qty, Long::sumExact);
-        reservedPositions.merge(symbol, -qty, Long::sum);
-        positions.merge(symbol, qty, Long::sumExact);
-        positions.merge(symbol, -qty, Long::sum);
+        releasePosition(symbol, qty);
+        long nextPosition = getPosition(symbol) - qty;
+        if (nextPosition < 0) {
+            throw new IllegalStateException("卖单结算后持仓为负: " + accountId);
+        }
+        positions.put(symbol, nextPosition);
         cash = cash.add(price.multiply(BigDecimal.valueOf(qty)));
     }
 
