@@ -129,18 +129,19 @@ public class MatchingService {
             EventRecord accepted = batch.get(0);
             orders.put(order.getClientOrderId(), order);
             long traded = appendMatchEvents(order, batch);
-            if (order.remainingQty() > 0) {
+            long unfilledQty = order.getQty() - order.getFilledQty() - traded;
+            if (unfilledQty > 0) {
                 long seq = baseSeq + batch.size() + 1;
                 if (order.getTimeInForce() == TimeInForce.IOC) {
                     batch.add(seqEvent(seq, EventType.ORDER_CANCELLED,
-                            payload(order).remainingQty(order.remainingQty()).build()));
+                            payload(order).remainingQty(unfilledQty).build()));
                 } else if (order.getType() == OrderType.MARKET && order.getTimeInForce() == TimeInForce.GTC) {
                     batch.add(seqEvent(seq, EventType.ORDER_REJECTED, payload(order)
-                            .remainingQty(order.remainingQty())
+                            .remainingQty(unfilledQty)
                             .rejectReason(RejectReason.NO_LIQUIDITY).build()));
                 } else {
                     batch.add(seqEvent(seq, EventType.ORDER_ADDED_TO_BOOK,
-                            payload(order).remainingQty(order.remainingQty()).build()));
+                            payload(order).remainingQty(unfilledQty).build()));
                 }
             }
             nextEventSeq = accepted.seq() + 1;
