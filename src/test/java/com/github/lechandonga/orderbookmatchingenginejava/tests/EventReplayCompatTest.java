@@ -53,11 +53,12 @@ class EventReplayCompatTest {
         var result = recovered.submit(TestSupport.order("taker", "buyer", Side.BUY,
                 OrderType.MARKET, null, 8, com.github.lechandonga.orderbookmatchingenginejava.model.TimeInForce.IOC, null));
 
-        assertEquals(OrderStatus.CANCELLED, result.status());
+        assertEquals(OrderStatus.FILLED, result.status());
         assertEquals(8, result.filledQty());
         assertEquals(OrderStatus.FILLED, recovered.order("old-maker").getStatus());
         assertEquals(OrderStatus.FILLED, recovered.order("new-maker").getStatus());
-        log.info("[业务:新旧事件混合重放] 用例数=1 成功=1 失败=0 结果 filled={}", result.filledQty());
+        log.info("[业务:新旧事件混合重放-全成结论一致] 用例数=1 成功=1 失败=0 结果 status={}, filled={}",
+                result.status(), result.filledQty());
     }
 
     @Test
